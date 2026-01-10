@@ -18,6 +18,8 @@ public class ProprietairePanel extends JPanel {
     private metier.GestionRecu gestionRecu;
     private metier.GestionEmprunt gestionEmprunt;
     private metier.GestionBoutique gestionBoutique;
+    private metier.GestionReparateur gestionReparateur;
+    private metier.GestionProprietaire gestionProprietaire;
 
     // Composants UI
     private JTabbedPane tabbedPane;
@@ -33,6 +35,8 @@ public class ProprietairePanel extends JPanel {
         gestionRecu = new metier.GestionRecu();
         gestionEmprunt = new metier.GestionEmprunt();
         gestionBoutique = new metier.GestionBoutique();
+        gestionReparateur = new metier.GestionReparateur();
+        gestionProprietaire = new metier.GestionProprietaire();
 
         initializeComponents();
         setupLayout();
@@ -206,53 +210,473 @@ public class ProprietairePanel extends JPanel {
 
     private void createBoutiquesTab() {
         JPanel boutiquesPanel = new JPanel(new BorderLayout());
+        boutiquesPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Boutons pour les boutiques
+        // Panel principal avec onglets pour différentes fonctionnalités
+        JTabbedPane boutiqueTabbedPane = new JTabbedPane();
+
+        // Onglet 1: Gestion des Boutiques
+        boutiqueTabbedPane.addTab("🏪 Mes Boutiques", createMesBoutiquesPanel());
+
+        // Onglet 2: Nouvelle Boutique
+        boutiqueTabbedPane.addTab("➕ Nouvelle Boutique", createNouvelleBoutiquePanel());
+
+        // Onglet 3: Assigner Réparateurs
+        boutiqueTabbedPane.addTab("👷 Assigner Réparateurs", createAssignerReparateursPanel());
+
+        boutiquesPanel.add(boutiqueTabbedPane, BorderLayout.CENTER);
+        tabbedPane.addTab("🏪 Boutiques", boutiquesPanel);
+    }
+
+    private JPanel createMesBoutiquesPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Boutons d'action
         JPanel buttonPanel = new JPanel(new FlowLayout());
 
-        JButton btnVoirBoutiques = new JButton("🏪 Voir Boutiques");
-        JButton btnAjouterBoutique = new JButton("➕ Nouvelle Boutique");
-        JButton btnModifierBoutique = new JButton("✏️ Modifier Boutique");
+        JButton btnRafraichir = new JButton("🔄 Rafraîchir");
+        JButton btnModifier = new JButton("✏️ Modifier");
+        JButton btnDetails = new JButton("📊 Détails");
 
-        btnVoirBoutiques.setBackground(new Color(52, 152, 219));
-        btnAjouterBoutique.setBackground(new Color(40, 167, 69));
-        btnModifierBoutique.setBackground(new Color(255, 193, 7));
+        btnRafraichir.setBackground(new Color(52, 152, 219));
+        btnModifier.setBackground(new Color(255, 193, 7));
+        btnDetails.setBackground(new Color(155, 89, 182));
 
-        for (JButton btn : new JButton[]{btnVoirBoutiques, btnAjouterBoutique, btnModifierBoutique}) {
+        for (JButton btn : new JButton[]{btnRafraichir, btnModifier, btnDetails}) {
             btn.setForeground(Color.WHITE);
             btn.setFocusPainted(false);
-            btn.setPreferredSize(new Dimension(150, 35));
+            btn.setPreferredSize(new Dimension(120, 35));
             buttonPanel.add(btn);
         }
 
-        boutiquesPanel.add(buttonPanel, BorderLayout.NORTH);
+        panel.add(buttonPanel, BorderLayout.NORTH);
 
         // Table des boutiques
-        String[] columns = {"ID Boutique", "Nom", "Adresse", "Téléphone", "Numéro P"};
-        JTable table = new JTable(new Object[][]{}, columns);
+        String[] columns = {"ID Boutique", "Nom", "Adresse", "Téléphone", "Numéro P", "Réparateurs"};
+        DefaultTableModel tableModel = new DefaultTableModel(columns, 0);
+        JTable table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
-        boutiquesPanel.add(scrollPane, BorderLayout.CENTER);
+        panel.add(scrollPane, BorderLayout.CENTER);
 
-        tabbedPane.addTab("🏪 Boutiques", boutiquesPanel);
+        // Charger les boutiques du propriétaire
+        rafraichirMesBoutiques(tableModel);
 
         // Listeners
-        btnVoirBoutiques.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this,
-                "Affichage des boutiques - Fonctionnalité à implémenter",
-                "Information", JOptionPane.INFORMATION_MESSAGE);
-        });
+        btnRafraichir.addActionListener(e -> rafraichirMesBoutiques(tableModel));
 
-        btnAjouterBoutique.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this,
-                "Ajout de nouvelle boutique - Fonctionnalité à implémenter",
-                "Information", JOptionPane.INFORMATION_MESSAGE);
-        });
+        btnModifier.addActionListener(e -> modifierMaBoutique(table, tableModel));
 
-        btnModifierBoutique.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this,
-                "Modification de boutique - Fonctionnalité à implémenter",
-                "Information", JOptionPane.INFORMATION_MESSAGE);
-        });
+        btnDetails.addActionListener(e -> voirDetailsBoutique(table));
+
+        return panel;
+    }
+
+    private JPanel createNouvelleBoutiquePanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Titre
+        JLabel titleLabel = new JLabel("Créer une Nouvelle Boutique", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        panel.add(titleLabel, BorderLayout.NORTH);
+
+        // Formulaire
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        // Champs du formulaire
+        JTextField nomField = new JTextField(20);
+        JTextField adresseField = new JTextField(20);
+        JTextField telField = new JTextField(20);
+        JTextField numPField = new JTextField(20);
+
+        gbc.gridx = 0; gbc.gridy = 0;
+        formPanel.add(new JLabel("Nom de la boutique:"), gbc);
+        gbc.gridx = 1;
+        formPanel.add(nomField, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 1;
+        formPanel.add(new JLabel("Adresse:"), gbc);
+        gbc.gridx = 1;
+        formPanel.add(adresseField, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 2;
+        formPanel.add(new JLabel("Téléphone:"), gbc);
+        gbc.gridx = 1;
+        formPanel.add(telField, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 3;
+        formPanel.add(new JLabel("Numéro Postal:"), gbc);
+        gbc.gridx = 1;
+        formPanel.add(numPField, gbc);
+
+        panel.add(formPanel, BorderLayout.CENTER);
+
+        // Bouton créer
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton btnCreer = new JButton("🏪 Créer Boutique");
+        btnCreer.setBackground(new Color(40, 167, 69));
+        btnCreer.setForeground(Color.WHITE);
+        btnCreer.setFocusPainted(false);
+        btnCreer.setPreferredSize(new Dimension(150, 40));
+        buttonPanel.add(btnCreer);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Listener
+        btnCreer.addActionListener(e -> creerNouvelleBoutique(nomField, adresseField, telField, numPField));
+
+        return panel;
+    }
+
+    private JPanel createAssignerReparateursPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Titre
+        JLabel titleLabel = new JLabel("Assigner des Réparateurs à mes Boutiques", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        panel.add(titleLabel, BorderLayout.NORTH);
+
+        // Panel principal
+        JPanel mainPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+
+        // 1. Sélection Boutique-Réparateur
+        JPanel assignPanel = new JPanel(new BorderLayout());
+        assignPanel.setBorder(BorderFactory.createTitledBorder("Assigner un Réparateur"));
+
+        JPanel controlsPanel = new JPanel(new FlowLayout());
+
+        JComboBox<String> boutiqueCombo = new JComboBox<>();
+        JComboBox<String> reparateurCombo = new JComboBox<>();
+        JButton btnAssigner = new JButton("👷 Assigner");
+
+        controlsPanel.add(new JLabel("Ma Boutique:"));
+        controlsPanel.add(boutiqueCombo);
+        controlsPanel.add(new JLabel("Réparateur:"));
+        controlsPanel.add(reparateurCombo);
+        controlsPanel.add(btnAssigner);
+
+        assignPanel.add(controlsPanel, BorderLayout.CENTER);
+
+        // 2. Liste des assignations
+        JPanel listPanel = new JPanel(new BorderLayout());
+        listPanel.setBorder(BorderFactory.createTitledBorder("Réparateurs assignés"));
+
+        String[] columns = {"ID Réparateur", "Nom", "Prénom", "Email", "Boutique"};
+        DefaultTableModel tableModel = new DefaultTableModel(columns, 0);
+        JTable table = new JTable(tableModel);
+        JScrollPane scrollPane = new JScrollPane(table);
+        listPanel.add(scrollPane, BorderLayout.CENTER);
+
+        JButton btnRafraichir = new JButton("🔄 Rafraîchir");
+        JButton btnDissocier = new JButton("🔗 Dissocier");
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.add(btnRafraichir);
+        buttonPanel.add(btnDissocier);
+        listPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        mainPanel.add(assignPanel);
+        mainPanel.add(listPanel);
+        panel.add(mainPanel, BorderLayout.CENTER);
+
+        // Charger les données
+        chargerMesBoutiques(boutiqueCombo);
+        chargerReparateursDisponibles(reparateurCombo);
+        rafraichirAssignationsReparateurs(tableModel);
+
+        // Listeners
+        btnAssigner.addActionListener(e -> assignerReparateurABoutique(boutiqueCombo, reparateurCombo, tableModel));
+        btnRafraichir.addActionListener(e -> rafraichirAssignationsReparateurs(tableModel));
+        btnDissocier.addActionListener(e -> dissocierReparateur(table, tableModel));
+
+        return panel;
+    }
+
+    private void rafraichirMesBoutiques(DefaultTableModel tableModel) {
+        try {
+            tableModel.setRowCount(0);
+
+            // Récupérer le propriétaire connecté
+            dao.Proprietaire proprietaire = null;
+            List<dao.Proprietaire> proprietaires = gestionProprietaire.lister();
+            for (dao.Proprietaire p : proprietaires) {
+                if (p.getEmail().equals(proprietaireEmail)) {
+                    proprietaire = p;
+                    break;
+                }
+            }
+
+            if (proprietaire != null) {
+                List<dao.Boutique> boutiques = gestionBoutique.lister();
+                for (dao.Boutique b : boutiques) {
+                    if (b.getProprietaire() != null && b.getProprietaire().getId() == proprietaire.getId()) {
+                        // Compter les réparateurs assignés (approximation)
+                        int nbReparateurs = 0; // TODO: implémenter le comptage
+                        tableModel.addRow(new Object[]{
+                            b.getIdBoutique(),
+                            b.getNom(),
+                            b.getAdresse(),
+                            b.getNumTel(),
+                            b.getNumP(),
+                            nbReparateurs + " réparateur(s)"
+                        });
+                    }
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erreur lors du chargement des boutiques: " + e.getMessage(),
+                "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void creerNouvelleBoutique(JTextField nomField, JTextField adresseField,
+                                      JTextField telField, JTextField numPField) {
+        // Validation des champs
+        if (nomField.getText().trim().isEmpty() || adresseField.getText().trim().isEmpty() ||
+            telField.getText().trim().isEmpty() || numPField.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Tous les champs sont obligatoires.",
+                "Champs manquants", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            // Récupérer le propriétaire connecté
+            dao.Proprietaire proprietaire = null;
+            List<dao.Proprietaire> proprietaires = gestionProprietaire.lister();
+            for (dao.Proprietaire p : proprietaires) {
+                if (p.getEmail().equals(proprietaireEmail)) {
+                    proprietaire = p;
+                    break;
+                }
+            }
+
+            if (proprietaire == null) {
+                JOptionPane.showMessageDialog(this, "Propriétaire non trouvé.",
+                    "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Créer la boutique
+            dao.Boutique boutique = dao.Boutique.builder()
+                .nom(nomField.getText().trim())
+                .adresse(adresseField.getText().trim())
+                .numTel(Integer.parseInt(telField.getText().trim()))
+                .numP(Integer.parseInt(numPField.getText().trim()))
+                .proprietaire(proprietaire)
+                .build();
+
+            gestionBoutique.ajouter(boutique);
+
+            JOptionPane.showMessageDialog(this, "Boutique créée avec succès !");
+
+            // Vider les champs
+            nomField.setText("");
+            adresseField.setText("");
+            telField.setText("");
+            numPField.setText("");
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Le téléphone et le numéro postal doivent être des nombres.",
+                "Format invalide", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erreur lors de la création: " + e.getMessage(),
+                "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void modifierMaBoutique(JTable table, DefaultTableModel tableModel) {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Veuillez sélectionner une boutique à modifier.",
+                "Sélection requise", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            int idBoutique = (Integer) table.getValueAt(selectedRow, 0);
+            dao.Boutique boutique = gestionBoutique.rechercher(idBoutique);
+
+            if (boutique == null) {
+                JOptionPane.showMessageDialog(this, "Boutique introuvable.",
+                    "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Ouvrir dialog de modification
+            JTextField nomField = new JTextField(boutique.getNom());
+            JTextField adresseField = new JTextField(boutique.getAdresse());
+            JTextField telField = new JTextField(String.valueOf(boutique.getNumTel()));
+            JTextField numPField = new JTextField(String.valueOf(boutique.getNumP()));
+
+            Object[] message = {
+                "Nom:", nomField,
+                "Adresse:", adresseField,
+                "Téléphone:", telField,
+                "Numéro Postal:", numPField
+            };
+
+            int option = JOptionPane.showConfirmDialog(this, message, "Modifier Boutique",
+                JOptionPane.OK_CANCEL_OPTION);
+
+            if (option == JOptionPane.OK_OPTION) {
+                boutique.setNom(nomField.getText());
+                boutique.setAdresse(adresseField.getText());
+                boutique.setNumTel(Integer.parseInt(telField.getText()));
+                boutique.setNumP(Integer.parseInt(numPField.getText()));
+
+                gestionBoutique.modifer(boutique);
+                rafraichirMesBoutiques(tableModel);
+
+                JOptionPane.showMessageDialog(this, "Boutique modifiée avec succès !");
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erreur lors de la modification: " + e.getMessage(),
+                "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void voirDetailsBoutique(JTable table) {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Veuillez sélectionner une boutique.",
+                "Sélection requise", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            int idBoutique = (Integer) table.getValueAt(selectedRow, 0);
+            dao.Boutique boutique = gestionBoutique.rechercher(idBoutique);
+
+            if (boutique != null) {
+                String details = String.format(
+                    "Détails de la Boutique:\n\n" +
+                    "ID: %d\n" +
+                    "Nom: %s\n" +
+                    "Adresse: %s\n" +
+                    "Téléphone: %d\n" +
+                    "Numéro Postal: %d",
+                    boutique.getIdBoutique(),
+                    boutique.getNom(),
+                    boutique.getAdresse(),
+                    boutique.getNumTel(),
+                    boutique.getNumP()
+                );
+
+                JOptionPane.showMessageDialog(this, details, "Détails Boutique",
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erreur lors de la récupération des détails: " + e.getMessage(),
+                "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void chargerMesBoutiques(JComboBox<String> combo) {
+        try {
+            combo.removeAllItems();
+            combo.addItem("-- Sélectionner ma Boutique --");
+
+            // Récupérer le propriétaire connecté
+            dao.Proprietaire proprietaire = null;
+            List<dao.Proprietaire> proprietaires = gestionProprietaire.lister();
+            for (dao.Proprietaire p : proprietaires) {
+                if (p.getEmail().equals(proprietaireEmail)) {
+                    proprietaire = p;
+                    break;
+                }
+            }
+
+            if (proprietaire != null) {
+                List<dao.Boutique> boutiques = gestionBoutique.lister();
+                for (dao.Boutique b : boutiques) {
+                    if (b.getProprietaire() != null && b.getProprietaire().getId() == proprietaire.getId()) {
+                        combo.addItem(b.getIdBoutique() + " - " + b.getNom());
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erreur lors du chargement des boutiques: " + e.getMessage(),
+                "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void chargerReparateursDisponibles(JComboBox<String> combo) {
+        try {
+            combo.removeAllItems();
+            combo.addItem("-- Sélectionner Réparateur --");
+
+            List<dao.Reparateur> reparateurs = gestionReparateur.lister();
+            for (dao.Reparateur r : reparateurs) {
+                combo.addItem(r.getId() + " - " + r.getNom() + " " + r.getPrenom());
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erreur lors du chargement des réparateurs: " + e.getMessage(),
+                "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void assignerReparateurABoutique(JComboBox<String> boutiqueCombo, JComboBox<String> reparateurCombo,
+                                           DefaultTableModel tableModel) {
+        if (boutiqueCombo.getSelectedIndex() == 0 || reparateurCombo.getSelectedIndex() == 0) {
+            JOptionPane.showMessageDialog(this, "Veuillez sélectionner une boutique et un réparateur.",
+                "Sélection requise", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Note: Pour simplifier, nous allons juste enregistrer l'assignation
+        // Dans une vraie implémentation, il faudrait une table de jointure reparateur_boutique
+        JOptionPane.showMessageDialog(this,
+            "Fonctionnalité d'assignation de réparateur - À implémenter dans la base de données\n" +
+            "Il faudrait créer une table de jointure reparateur_boutique.",
+            "Information", JOptionPane.INFORMATION_MESSAGE);
+
+        rafraichirAssignationsReparateurs(tableModel);
+    }
+
+    private void rafraichirAssignationsReparateurs(DefaultTableModel tableModel) {
+        try {
+            tableModel.setRowCount(0);
+
+            // Pour l'instant, afficher tous les réparateurs
+            // TODO: filtrer par boutique propriétaire
+            List<dao.Reparateur> reparateurs = gestionReparateur.lister();
+            for (dao.Reparateur r : reparateurs) {
+                tableModel.addRow(new Object[]{
+                    r.getId(),
+                    r.getNom(),
+                    r.getPrenom(),
+                    r.getEmail(),
+                    "Non assigné" // TODO: récupérer la boutique assignée
+                });
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erreur lors du chargement: " + e.getMessage(),
+                "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void dissocierReparateur(JTable table, DefaultTableModel tableModel) {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Veuillez sélectionner un réparateur à dissocier.",
+                "Sélection requise", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        JOptionPane.showMessageDialog(this,
+            "Fonctionnalité de dissociation - À implémenter",
+            "Information", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void createRapportsTab() {
