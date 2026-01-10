@@ -211,8 +211,8 @@ public class AdminPanel extends JPanel {
 
         // Table pour afficher les données
         String[] columnNames = columns;
-        Object[][] data = {}; // Données vides initialement
-        JTable table = new JTable(data, columnNames);
+        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
+        JTable table = new JTable(tableModel);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         JScrollPane scrollPane = new JScrollPane(table);
