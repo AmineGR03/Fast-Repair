@@ -1,1 +1,19 @@
+# Compiled class files
 /target/
+*.class
+
+# Eclipse project files (optional - comment out if you want to commit them)
+# .project
+# .classpath
+# .settings/
+
+# IDE files
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
