@@ -50,10 +50,16 @@ public class GestionReparation implements IGestionReparation {
             tx = em.getTransaction();
             tx.begin();
 
-            // VÃ©rifier si une rÃ©paration avec le mÃªme ID existe dÃ©jÃ 
-            Reparation existingReparation = em.find(Reparation.class, reparation.getIdAppareil());
-            if (existingReparation != null) {
-                throw new DuplicateEntityException("Une rÃ©paration avec l'ID appareil " + reparation.getIdAppareil() + " existe dÃ©jÃ ");
+            // Pas besoin de vérifier l'ID car il est auto-généré
+            // Vérifier seulement si l'appareil a déjà une réparation
+            if (reparation.getIdAppareil() > 0) {
+                TypedQuery<Reparation> query = em.createQuery(
+                    "SELECT r FROM Reparation r WHERE r.idAppareil = :idAppareil", Reparation.class);
+                query.setParameter("idAppareil", reparation.getIdAppareil());
+                List<Reparation> existing = query.getResultList();
+                if (!existing.isEmpty()) {
+                    throw new DuplicateEntityException("Une réparation pour l'appareil ID " + reparation.getIdAppareil() + " existe déjà");
+                }
             }
 
             em.persist(reparation);
@@ -88,12 +94,15 @@ public class GestionReparation implements IGestionReparation {
             tx = em.getTransaction();
             tx.begin();
 
-            Reparation existingReparation = em.find(Reparation.class, reparation.getIdAppareil());
+            Reparation existingReparation = em.find(Reparation.class, reparation.getIdReparation());
             if (existingReparation == null) {
-                throw new EntityNotFoundException("RÃ©paration avec l'ID appareil " + reparation.getIdAppareil() + " non trouvÃ©e");
+                throw new EntityNotFoundException("Réparation avec l'ID " + reparation.getIdReparation() + " non trouvée");
             }
 
-            // Mettre Ã  jour les attributs
+            // Mettre à jour les attributs
+            existingReparation.setIdAppareil(reparation.getIdAppareil());
+            existingReparation.setIdBoutique(reparation.getIdBoutique());
+            existingReparation.setIdReparateur(reparation.getIdReparateur());
             existingReparation.setCodeSuivi(reparation.getCodeSuivi());
             existingReparation.setDateDepot(reparation.getDateDepot());
             existingReparation.setEtat(reparation.getEtat());
@@ -125,7 +134,7 @@ public class GestionReparation implements IGestionReparation {
 
             Reparation reparation = em.find(Reparation.class, id);
             if (reparation == null) {
-                throw new EntityNotFoundException("RÃ©paration avec l'ID appareil " + id + " non trouvÃ©e");
+                throw new EntityNotFoundException("Réparation avec l'ID " + id + " non trouvée");
             }
 
             em.remove(reparation);

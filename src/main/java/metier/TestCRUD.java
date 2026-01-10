@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import dao.*;
-import exception.*;
 
 /**
  * Classe de test complète pour toutes les opérations CRUD
@@ -14,14 +13,11 @@ public class TestCRUD {
 
     public static void main(String[] args) {
         System.out.println("🚀 Test CRUD Complet - FastRepair\n");
+        System.out.println("ℹ️  Connexion à la base de données via persistence.xml\n");
 
         try {
-            // Initialiser la connexion
-            System.out.println("1. Initialisation de la connexion...");
-            DatabaseConnection.initialize();
-            System.out.println("✅ Connexion établie!\n");
-
             // Tester tous les CRUD
+            // Chaque Gestion classe crée sa propre EntityManagerFactory
             testClientCRUD();
             testReparateurCRUD();
             testProprietaireCRUD();
@@ -38,9 +34,6 @@ public class TestCRUD {
         } catch (Exception e) {
             System.err.println("\n❌ Erreur lors des tests:");
             e.printStackTrace();
-        } finally {
-            DatabaseConnection.close();
-            System.out.println("\n🔄 Connexion fermée.");
         }
     }
 

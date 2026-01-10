@@ -20,7 +20,7 @@ public class TestClientPresentation {
         scanner = new Scanner(System.in);
 
         try {
-            System.out.println("=== TEST DES FONCTIONNALITÉS CRUD CLIENT (avec Singleton DatabaseConnection) ===\n");
+            System.out.println("=== TEST DES FONCTIONNALITÉS CRUD CLIENT (connexion via persistence.xml) ===\n");
 
             // Test d'ajout de clients
             testAjouterClients();

@@ -2,8 +2,6 @@ package presentation;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * Fenêtre principale de l'application Fast-Repair

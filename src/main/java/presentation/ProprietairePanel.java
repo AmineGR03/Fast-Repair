@@ -408,8 +408,8 @@ public class ProprietairePanel extends JPanel {
                 StringBuilder sb = new StringBuilder();
                 sb.append("=== ÉTAT DES CAISSES ===\n\n");
 
-                var caisses = gestionCaisse.lister();
-                for (var caisse : caisses) {
+                java.util.List<dao.Caisse> caisses = gestionCaisse.lister();
+                for (dao.Caisse caisse : caisses) {
                     sb.append(String.format("Caisse ID %d: %.2f € (Dernier mouvement: %s)\n",
                         caisse.getIdCaisse(),
                         caisse.getSoldeActuel(),
@@ -428,9 +428,9 @@ public class ProprietairePanel extends JPanel {
                 StringBuilder sb = new StringBuilder();
                 sb.append("=== REÇUS ===\n\n");
 
-                var recus = gestionRecu.lister();
+                java.util.List<dao.Recu> recus = gestionRecu.lister();
                 double total = 0;
-                for (var recu : recus) {
+                for (dao.Recu recu : recus) {
                     sb.append(String.format("Reçu ID %d: %.2f € (Date: %s)\n",
                         recu.getIdRecu(),
                         recu.getMontant(),
@@ -451,9 +451,9 @@ public class ProprietairePanel extends JPanel {
                 StringBuilder sb = new StringBuilder();
                 sb.append("=== EMPRUNTS ===\n\n");
 
-                var emprunts = gestionEmprunt.lister();
+                java.util.List<dao.Emprunt> emprunts = gestionEmprunt.lister();
                 double total = 0;
-                for (var emprunt : emprunts) {
+                for (dao.Emprunt emprunt : emprunts) {
                     sb.append(String.format("Emprunt ID %d: %.2f € (Type: %s, Date: %s)\nCommentaire: %s\n\n",
                         emprunt.getIdEmprunt(),
                         emprunt.getMontant(),

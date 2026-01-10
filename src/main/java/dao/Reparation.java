@@ -20,7 +20,12 @@ import lombok.NoArgsConstructor;
 public class Reparation {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int idReparation;
+	
 	private int idAppareil;
+	private int idBoutique;
+	private int idReparateur;
+	
 	private String codeSuivi;
 	private LocalDateTime dateDepot;
 	private String etat;

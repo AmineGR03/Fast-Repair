@@ -191,7 +191,7 @@ public class SuiviReparationPanel extends JPanel {
 
         sb.append("💰 INFORMATIONS FINANCIÈRES\n");
         sb.append("Prix total estimé: ");
-        if (reparation.getPrixTotal() != null && reparation.getPrixTotal() > 0) {
+        if (reparation.getPrixTotal() > 0) {
             sb.append(String.format("%.2f €", reparation.getPrixTotal()));
         } else {
             sb.append("À déterminer");

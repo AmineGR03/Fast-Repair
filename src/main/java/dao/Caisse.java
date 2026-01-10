@@ -5,6 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,4 +24,8 @@ public class Caisse {
 	private int idCaisse;
 	private double soldeActuel;
 	private LocalDateTime dernierMouvement;
+	
+	@OneToOne
+	@JoinColumn(name = "idBoutique")
+	private Boutique boutique;
 }

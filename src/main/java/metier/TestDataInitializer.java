@@ -1,9 +1,9 @@
 package metier;
 
-import java.time.LocalDateTime;
 import dao.*;
 import exception.DatabaseException;
 import exception.DuplicateEntityException;
+import exception.InvalidParameterException;
 
 /**
  * Classe utilitaire pour initialiser des données de test
@@ -38,7 +38,7 @@ public class TestDataInitializer {
         }
     }
 
-    private static void initializeClients() throws DatabaseException, DuplicateEntityException {
+    private static void initializeClients() throws DatabaseException, DuplicateEntityException, InvalidParameterException {
         GestionClient gestion = new GestionClient();
 
         try {
@@ -76,7 +76,7 @@ public class TestDataInitializer {
         }
     }
 
-    private static void initializeReparateurs() throws DatabaseException, DuplicateEntityException {
+    private static void initializeReparateurs() throws DatabaseException, DuplicateEntityException, InvalidParameterException {
         GestionReparateur gestion = new GestionReparateur();
 
         try {
@@ -107,7 +107,7 @@ public class TestDataInitializer {
         }
     }
 
-    private static void initializeProprietaires() throws DatabaseException, DuplicateEntityException {
+    private static void initializeProprietaires() throws DatabaseException, DuplicateEntityException, InvalidParameterException {
         GestionProprietaire gestion = new GestionProprietaire();
 
         try {
@@ -127,7 +127,7 @@ public class TestDataInitializer {
         }
     }
 
-    private static void initializeAppareils() throws DatabaseException, DuplicateEntityException {
+    private static void initializeAppareils() throws DatabaseException, DuplicateEntityException, InvalidParameterException {
         GestionAppareil gestion = new GestionAppareil();
 
         try {
@@ -165,7 +165,7 @@ public class TestDataInitializer {
         }
     }
 
-    private static void initializeBoutiques() throws DatabaseException, DuplicateEntityException {
+    private static void initializeBoutiques() throws DatabaseException, DuplicateEntityException, InvalidParameterException {
         GestionBoutique gestion = new GestionBoutique();
 
         try {
@@ -200,11 +200,10 @@ public class TestDataInitializer {
     public static void main(String[] args) {
         try {
             System.out.println("🚀 Initialisation des données de test FastRepair\n");
-
-            // Initialiser la connexion
-            DatabaseConnection.initialize();
+            System.out.println("ℹ️  Connexion à la base de données via persistence.xml\n");
 
             // Initialiser les données
+            // Chaque Gestion classe crée sa propre EntityManagerFactory
             initializeTestData();
 
             System.out.println("\n✅ Initialisation terminée avec succès!");
@@ -212,8 +211,6 @@ public class TestDataInitializer {
         } catch (Exception e) {
             System.err.println("\n❌ Erreur lors de l'initialisation:");
             e.printStackTrace();
-        } finally {
-            DatabaseConnection.close();
         }
     }
 }

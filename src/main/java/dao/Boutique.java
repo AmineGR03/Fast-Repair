@@ -3,6 +3,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,5 +26,12 @@ public class Boutique {
 	private String adresse;
 	private int numTel;
 	private int numP;
+	
+	@ManyToOne
+	@JoinColumn(name = "idProprietaire")
+	private Proprietaire proprietaire;
+	
+	@OneToOne(mappedBy = "boutique")
+	private Caisse caisse;
 
 }

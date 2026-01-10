@@ -49,15 +49,27 @@ public class GestionAppareil implements IGestionAppareil {
             tx = em.getTransaction();
             tx.begin();
 
-            // VÃ©rifier si un appareil avec le mÃªme ID existe dÃ©jÃ 
-            Appareil existingAppareil = em.find(Appareil.class, appareil.getIdAppareil());
-            if (existingAppareil != null) {
-                throw new DuplicateEntityException("Un appareil avec l'ID " + appareil.getIdAppareil() + " existe dÃ©jÃ ");
+            // Vérifier si un appareil avec le même IMEI existe déjà (IMEI doit être unique)
+            if (appareil.getImei() != null && !appareil.getImei().trim().isEmpty()) {
+                TypedQuery<Appareil> query = em.createQuery(
+                    "SELECT a FROM Appareil a WHERE a.imei = :imei", Appareil.class);
+                query.setParameter("imei", appareil.getImei());
+                List<Appareil> existing = query.getResultList();
+                if (!existing.isEmpty()) {
+                    throw new DuplicateEntityException("Un appareil avec l'IMEI " + appareil.getImei() + " existe déjà");
+                }
             }
 
             em.persist(appareil);
+            // Récupérer l'ID généré après persist
+            em.flush();
             tx.commit();
 
+        } catch (DuplicateEntityException e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
                 tx.rollback();
@@ -135,19 +147,43 @@ public class GestionAppareil implements IGestionAppareil {
     @Override
     public Appareil rechercher(int id) throws DatabaseException {
         try {
-            return em.find(Appareil.class, id);
+            // S'assurer que l'EntityManager est ouvert
+            if (!em.isOpen()) {
+                this.em = emf.createEntityManager();
+            }
+            // Rafraîchir le cache
+            em.clear();
+            Appareil result = em.find(Appareil.class, id);
+            if (result != null) {
+                System.out.println("Appareil trouvé - ID: " + result.getIdAppareil() + ", IMEI: " + result.getImei());
+            } else {
+                System.out.println("Aucun appareil trouvé avec l'ID: " + id);
+            }
+            return result;
         } catch (Exception e) {
-            throw new DatabaseException("Erreur lors de la recherche de l'appareil", e);
+            System.err.println("Erreur dans rechercher(): " + e.getMessage());
+            e.printStackTrace();
+            throw new DatabaseException("Erreur lors de la recherche de l'appareil: " + e.getMessage(), e);
         }
     }
 
     @Override
     public List<Appareil> lister() throws DatabaseException {
         try {
+            // S'assurer que l'EntityManager est ouvert
+            if (!em.isOpen()) {
+                this.em = emf.createEntityManager();
+            }
+            // Rafraîchir le cache pour avoir les dernières données
+            em.clear();
             TypedQuery<Appareil> query = em.createQuery("SELECT a FROM Appareil a", Appareil.class);
-            return query.getResultList();
+            List<Appareil> result = query.getResultList();
+            System.out.println("Nombre d'appareils trouvés: " + result.size());
+            return result;
         } catch (Exception e) {
-            throw new DatabaseException("Erreur lors du listage des appareils", e);
+            System.err.println("Erreur dans lister(): " + e.getMessage());
+            e.printStackTrace();
+            throw new DatabaseException("Erreur lors du listage des appareils: " + e.getMessage(), e);
         }
     }
 
