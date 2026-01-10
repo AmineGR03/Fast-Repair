@@ -206,7 +206,7 @@ public class GestionAppareil implements IGestionAppareil {
     @Override
     public List<Appareil> filtrerParMarque(String marque) throws InvalidParameterException, DatabaseException {
         if (marque == null || marque.trim().isEmpty()) {
-            throw new InvalidParameterException("La marque ne peut pas Ãªtre null ou vide");
+            throw new InvalidParameterException("La marque ne peut pas être null ou vide");
         }
 
         try {
@@ -222,7 +222,7 @@ public class GestionAppareil implements IGestionAppareil {
     @Override
     public List<Appareil> filtrerParModele(String modele) throws InvalidParameterException, DatabaseException {
         if (modele == null || modele.trim().isEmpty()) {
-            throw new InvalidParameterException("Le modÃ¨le ne peut pas Ãªtre null ou vide");
+            throw new InvalidParameterException("Le modÃ¨le ne peut pas être null ou vide");
         }
 
         try {
@@ -231,14 +231,14 @@ public class GestionAppareil implements IGestionAppareil {
             query.setParameter("modele", "%" + modele + "%");
             return query.getResultList();
         } catch (Exception e) {
-            throw new DatabaseException("Erreur lors du filtrage des appareils par modÃ¨le", e);
+            throw new DatabaseException("Erreur lors du filtrage des appareils par modéle", e);
         }
     }
 
     @Override
     public List<Appareil> filtrerParTypeAppareil(String typeAppareil) throws InvalidParameterException, DatabaseException {
         if (typeAppareil == null || typeAppareil.trim().isEmpty()) {
-            throw new InvalidParameterException("Le type d'appareil ne peut pas Ãªtre null ou vide");
+            throw new InvalidParameterException("Le type d'appareil ne peut pas être null ou vide");
         }
 
         try {
