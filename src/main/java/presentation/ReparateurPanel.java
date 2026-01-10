@@ -1,0 +1,323 @@
+package presentation;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+/**
+ * Panel pour les réparateurs - Gestion des réparations
+ */
+public class ReparateurPanel extends JPanel {
+
+    private MainWindow mainWindow;
+    private String reparateurEmail;
+
+    // Gestionnaires métier
+    private metier.GestionReparation gestionReparation;
+    private metier.GestionAppareil gestionAppareil;
+    private metier.GestionComposant gestionComposant;
+
+    // Composants UI
+    private JTabbedPane tabbedPane;
+    private JButton logoutButton;
+    private JLabel welcomeLabel;
+
+    public ReparateurPanel(MainWindow mainWindow) {
+        this.mainWindow = mainWindow;
+        this.reparateurEmail = mainWindow.getCurrentUserEmail();
+
+        // Initialiser les gestionnaires
+        gestionReparation = new metier.GestionReparation();
+        gestionAppareil = new metier.GestionAppareil();
+        gestionComposant = new metier.GestionComposant();
+
+        initializeComponents();
+        setupLayout();
+        setupListeners();
+    }
+
+    private void initializeComponents() {
+        tabbedPane = new JTabbedPane();
+        logoutButton = new JButton("🚪 Déconnexion");
+        welcomeLabel = new JLabel();
+
+        // Style du bouton
+        logoutButton.setBackground(new Color(220, 53, 69));
+        logoutButton.setForeground(Color.WHITE);
+        logoutButton.setFocusPainted(false);
+        logoutButton.setFont(new Font("Arial", Font.BOLD, 12));
+
+        // Mettre à jour le label de bienvenue
+        updateWelcomeLabel();
+
+        // Créer les onglets
+        createReparationsTab();
+        createAppareilsTab();
+        createComposantsTab();
+        createProfileTab();
+    }
+
+    private void updateWelcomeLabel() {
+        welcomeLabel.setText("Bienvenue, Réparateur: " + (reparateurEmail != null ? reparateurEmail : "Inconnu"));
+        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        welcomeLabel.setForeground(new Color(70, 130, 180));
+    }
+
+    private void setupLayout() {
+        setLayout(new BorderLayout());
+
+        // Panel du haut avec le titre et le bouton de déconnexion
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        topPanel.setBackground(new Color(255, 235, 59)); // Jaune pour les réparateurs
+
+        topPanel.add(welcomeLabel, BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.setOpaque(false);
+        buttonPanel.add(logoutButton);
+        topPanel.add(buttonPanel, BorderLayout.EAST);
+
+        add(topPanel, BorderLayout.NORTH);
+        add(tabbedPane, BorderLayout.CENTER);
+    }
+
+    private void setupListeners() {
+        logoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int option = JOptionPane.showConfirmDialog(
+                    ReparateurPanel.this,
+                    "Êtes-vous sûr de vouloir vous déconnecter ?",
+                    "Confirmation de déconnexion",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE
+                );
+
+                if (option == JOptionPane.YES_OPTION) {
+                    mainWindow.logout();
+                }
+            }
+        });
+    }
+
+    private void createReparationsTab() {
+        JPanel reparationPanel = new JPanel(new BorderLayout());
+
+        // Panel des boutons d'action
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+
+        JButton btnNouvelleReparation = new JButton("🆕 Nouvelle Réparation");
+        JButton btnMettreAJour = new JButton("📝 Mettre à Jour");
+        JButton btnTerminer = new JButton("✅ Terminer Réparation");
+        JButton btnVoirToutes = new JButton("📋 Voir Toutes");
+
+        // Style des boutons
+        btnNouvelleReparation.setBackground(new Color(40, 167, 69));
+        btnMettreAJour.setBackground(new Color(255, 193, 7));
+        btnTerminer.setBackground(new Color(23, 162, 184));
+        btnVoirToutes.setBackground(new Color(108, 117, 125));
+
+        for (JButton btn : new JButton[]{btnNouvelleReparation, btnMettreAJour, btnTerminer, btnVoirToutes}) {
+            btn.setForeground(Color.WHITE);
+            btn.setFocusPainted(false);
+            btn.setPreferredSize(new Dimension(150, 35));
+            buttonPanel.add(btn);
+        }
+
+        reparationPanel.add(buttonPanel, BorderLayout.NORTH);
+
+        // Table des réparations
+        String[] columns = {"ID Appareil", "Code Suivi", "Date Dépôt", "État", "Commentaire", "Prix Total"};
+        Object[][] data = {}; // Données vides initialement
+        JTable table = new JTable(data, columns);
+        JScrollPane scrollPane = new JScrollPane(table);
+        reparationPanel.add(scrollPane, BorderLayout.CENTER);
+
+        tabbedPane.addTab("🔧 Mes Réparations", reparationPanel);
+
+        // Ajouter les listeners
+        addReparationListeners(btnNouvelleReparation, btnMettreAJour, btnTerminer, btnVoirToutes, table);
+    }
+
+    private void createAppareilsTab() {
+        JPanel appareilPanel = new JPanel(new BorderLayout());
+
+        // Boutons pour les appareils
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+
+        JButton btnVoirAppareils = new JButton("📱 Voir Appareils");
+        JButton btnAssocierAppareil = new JButton("🔗 Associer à Réparation");
+
+        btnVoirAppareils.setBackground(new Color(52, 152, 219));
+        btnAssocierAppareil.setBackground(new Color(155, 89, 182));
+
+        for (JButton btn : new JButton[]{btnVoirAppareils, btnAssocierAppareil}) {
+            btn.setForeground(Color.WHITE);
+            btn.setFocusPainted(false);
+            btn.setPreferredSize(new Dimension(150, 35));
+            buttonPanel.add(btn);
+        }
+
+        appareilPanel.add(buttonPanel, BorderLayout.NORTH);
+
+        // Table des appareils
+        String[] columns = {"ID Appareil", "IMEI", "Marque", "Modèle", "Type"};
+        JTable table = new JTable(new Object[][]{}, columns);
+        JScrollPane scrollPane = new JScrollPane(table);
+        appareilPanel.add(scrollPane, BorderLayout.CENTER);
+
+        tabbedPane.addTab("📱 Appareils", appareilPanel);
+
+        // Listeners
+        btnVoirAppareils.addActionListener(e -> {
+            try {
+                // Afficher tous les appareils
+                JOptionPane.showMessageDialog(this,
+                    "Affichage des appareils - Fonctionnalité à implémenter",
+                    "Information", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this,
+                    "Erreur: " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        btnAssocierAppareil.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this,
+                "Association appareil-réparation - Fonctionnalité à implémenter",
+                "Information", JOptionPane.INFORMATION_MESSAGE);
+        });
+    }
+
+    private void createComposantsTab() {
+        JPanel composantPanel = new JPanel(new BorderLayout());
+
+        // Boutons pour les composants
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+
+        JButton btnVoirComposants = new JButton("🔩 Voir Composants");
+        JButton btnUtiliserComposant = new JButton("⚙️ Utiliser Composant");
+
+        btnVoirComposants.setBackground(new Color(230, 126, 34));
+        btnUtiliserComposant.setBackground(new Color(231, 76, 60));
+
+        for (JButton btn : new JButton[]{btnVoirComposants, btnUtiliserComposant}) {
+            btn.setForeground(Color.WHITE);
+            btn.setFocusPainted(false);
+            btn.setPreferredSize(new Dimension(150, 35));
+            buttonPanel.add(btn);
+        }
+
+        composantPanel.add(buttonPanel, BorderLayout.NORTH);
+
+        // Table des composants
+        String[] columns = {"ID Composant", "Nom", "Prix", "Quantité"};
+        JTable table = new JTable(new Object[][]{}, columns);
+        JScrollPane scrollPane = new JScrollPane(table);
+        composantPanel.add(scrollPane, BorderLayout.CENTER);
+
+        tabbedPane.addTab("🔩 Composants", composantPanel);
+
+        // Listeners
+        btnVoirComposants.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this,
+                "Gestion des composants - Fonctionnalité à implémenter",
+                "Information", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        btnUtiliserComposant.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this,
+                "Utilisation de composants - Fonctionnalité à implémenter",
+                "Information", JOptionPane.INFORMATION_MESSAGE);
+        });
+    }
+
+    private void createProfileTab() {
+        JPanel profilePanel = new JPanel(new BorderLayout());
+        profilePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Informations du profil
+        JPanel infoPanel = new JPanel(new GridBagLayout());
+        infoPanel.setBorder(BorderFactory.createTitledBorder("Informations du Profil"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        gbc.gridx = 0; gbc.gridy = 0;
+        infoPanel.add(new JLabel("Email:"), gbc);
+        gbc.gridx = 1;
+        infoPanel.add(new JLabel(reparateurEmail != null ? reparateurEmail : "Non défini"), gbc);
+
+        gbc.gridx = 0; gbc.gridy = 1;
+        infoPanel.add(new JLabel("Rôle:"), gbc);
+        gbc.gridx = 1;
+        infoPanel.add(new JLabel("Réparateur"), gbc);
+
+        gbc.gridx = 0; gbc.gridy = 2;
+        infoPanel.add(new JLabel("Statut:"), gbc);
+        gbc.gridx = 1;
+        infoPanel.add(new JLabel("Actif"), gbc);
+
+        profilePanel.add(infoPanel, BorderLayout.NORTH);
+
+        // Boutons d'action
+        JPanel actionPanel = new JPanel(new FlowLayout());
+        JButton btnModifierProfil = new JButton("✏️ Modifier Profil");
+        JButton btnVoirStatistiques = new JButton("📊 Mes Statistiques");
+
+        btnModifierProfil.setBackground(new Color(255, 193, 7));
+        btnVoirStatistiques.setBackground(new Color(52, 152, 219));
+
+        for (JButton btn : new JButton[]{btnModifierProfil, btnVoirStatistiques}) {
+            btn.setForeground(Color.WHITE);
+            btn.setFocusPainted(false);
+            btn.setPreferredSize(new Dimension(150, 35));
+            actionPanel.add(btn);
+        }
+
+        profilePanel.add(actionPanel, BorderLayout.CENTER);
+
+        tabbedPane.addTab("👤 Profil", profilePanel);
+
+        // Listeners
+        btnModifierProfil.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this,
+                "Modification du profil - Fonctionnalité à implémenter",
+                "Information", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        btnVoirStatistiques.addActionListener(e -> {
+            JOptionPane.showMessageDialog(this,
+                "Statistiques personnelles - Fonctionnalité à implémenter",
+                "Information", JOptionPane.INFORMATION_MESSAGE);
+        });
+    }
+
+    private void addReparationListeners(JButton btnNouvelle, JButton btnMaj, JButton btnTerminer, JButton btnVoir, JTable table) {
+
+        btnVoir.addActionListener(e -> {
+            try {
+                // Afficher les réparations (simplifié pour l'instant)
+                JOptionPane.showMessageDialog(this,
+                    "Affichage des réparations du réparateur - Fonctionnalité à implémenter",
+                    "Information", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this,
+                    "Erreur: " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // Placeholders pour les autres boutons
+        ActionListener placeholderListener = e -> {
+            JButton source = (JButton) e.getSource();
+            JOptionPane.showMessageDialog(this,
+                "Fonctionnalité '" + source.getText() + "' - À implémenter",
+                "Information", JOptionPane.INFORMATION_MESSAGE);
+        };
+
+        btnNouvelle.addActionListener(placeholderListener);
+        btnMaj.addActionListener(placeholderListener);
+        btnTerminer.addActionListener(placeholderListener);
+    }
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    <!-- Configuration de la DataSource MySQL -->
+    <Resource
+        name="jdbc/FastRepairDB"
+        auth="Container"
+        type="javax.sql.DataSource"
+        maxActive="20"
+        maxIdle="5"
+        maxWait="10000"
+        username="root"
+        password=""
+        driverClassName="com.mysql.cj.jdbc.Driver"
+        url="jdbc:mysql://localhost:3306/fast_repair?useSSL=false&amp;serverTimezone=UTC&amp;createDatabaseIfNotExist=true&amp;allowPublicKeyRetrieval=true"
+        validationQuery="SELECT 1"
+        testOnBorrow="true"
+        removeAbandoned="true"
+        removeAbandonedTimeout="60"
+        logAbandoned="true"/>
+</Context>
+
+
