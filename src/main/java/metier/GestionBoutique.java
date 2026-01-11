@@ -55,7 +55,18 @@ public class GestionBoutique implements IGestionBoutique {
                 throw new DuplicateEntityException("Une boutique avec l'ID " + boutique.getIdBoutique() + " existe dÃ©jÃ ");
             }
 
+            // Persister la boutique d'abord
             em.persist(boutique);
+
+            // Créer automatiquement une caisse pour cette boutique
+            dao.Caisse caisse = dao.Caisse.builder()
+                .soldeActuel(0.0)
+                .dernierMouvement(java.time.LocalDateTime.now())
+                .boutique(boutique)
+                .build();
+
+            em.persist(caisse);
+
             tx.commit();
 
         } catch (DuplicateEntityException e) {
@@ -225,5 +236,7 @@ public class GestionBoutique implements IGestionBoutique {
         }
     }
 }
+
+
 
 

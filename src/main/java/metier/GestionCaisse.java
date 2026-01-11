@@ -175,7 +175,26 @@ public class GestionCaisse implements IGestionCaisse {
             throw new DatabaseException("Erreur lors du filtrage des caisses par dernier mouvement", e);
         }
     }
+
+    @Override
+    public boolean caisseExistePourBoutique(int idBoutique) throws DatabaseException {
+        if (idBoutique <= 0) {
+            return false;
+        }
+
+        try {
+            TypedQuery<Long> query = em.createQuery(
+                "SELECT COUNT(c) FROM Caisse c WHERE c.boutique.idBoutique = :idBoutique", Long.class);
+            query.setParameter("idBoutique", idBoutique);
+            Long count = query.getSingleResult();
+            return count > 0;
+        } catch (Exception e) {
+            throw new DatabaseException("Erreur lors de la vérification de l'existence d'une caisse pour la boutique " + idBoutique, e);
+        }
+    }
 }
+
+
 
 
 

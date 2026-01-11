@@ -24,4 +24,14 @@ public class Emprunt {
 	private String type;
 	private String commentaire;
 
+	@ManyToOne
+	@JoinColumn(name = "idCaisse")
+	private Caisse caisse;
+
+	@ManyToOne
+	@JoinColumn(name = "idReparateur")
+	private Reparateur reparateur;
+
 }
+
+

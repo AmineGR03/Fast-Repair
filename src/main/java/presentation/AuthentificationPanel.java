@@ -109,20 +109,6 @@ public class AuthentificationPanel extends JPanel {
 
         add(buttonPanel, gbc);
 
-        // Informations supplémentaires
-        gbc.gridy = 7;
-        JTextArea infoArea = new JTextArea(
-            "Pour les comptes de démonstration:\n" +
-            "• Admin: admin@fastrepair.com / admin123\n" +
-            "• Réparateur: reparateur@fastrepair.com / reparateur123\n" +
-            "• Propriétaire: proprietaire@fastrepair.com / proprietaire123"
-        );
-        infoArea.setEditable(false);
-        infoArea.setOpaque(false);
-        infoArea.setFont(new Font("Arial", Font.PLAIN, 11));
-        infoArea.setForeground(Color.GRAY);
-        infoArea.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
-        add(infoArea, gbc);
     }
 
     private void setupListeners() {
@@ -243,3 +229,5 @@ public class AuthentificationPanel extends JPanel {
         }
     }
 }
+
+

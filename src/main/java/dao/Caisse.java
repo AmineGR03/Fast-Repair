@@ -29,3 +29,5 @@ public class Caisse {
 	@JoinColumn(name = "idBoutique")
 	private Boutique boutique;
 }
+
+

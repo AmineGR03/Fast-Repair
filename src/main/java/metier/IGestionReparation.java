@@ -1,4 +1,4 @@
-package metier;
+﻿package metier;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,3 +24,5 @@ public interface IGestionReparation {
 	public List<Reparation> filtrerParPrixTotal(double prixTotal) throws InvalidParameterException, DatabaseException;
 
 }
+
+

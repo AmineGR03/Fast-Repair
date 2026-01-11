@@ -18,3 +18,5 @@ public class Client extends Personne {
 	private String adresse;
 	private int telephone;
 }
+
+

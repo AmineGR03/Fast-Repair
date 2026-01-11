@@ -252,3 +252,5 @@ public class GestionAppareil implements IGestionAppareil {
     }
 }
 
+
+

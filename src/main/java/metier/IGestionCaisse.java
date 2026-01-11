@@ -21,7 +21,12 @@ public interface IGestionCaisse {
 	public List<Caisse> filtrerParSoldeActuel(double soldeActuel) throws InvalidParameterException, DatabaseException;
 	public List<Caisse> filtrerParDernierMouvement(LocalDateTime dernierMouvement) throws InvalidParameterException, DatabaseException;
 
+	// Vérifications spécifiques
+	public boolean caisseExistePourBoutique(int idBoutique) throws DatabaseException;
+
 }
+
+
 
 
 

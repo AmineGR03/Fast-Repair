@@ -22,7 +22,17 @@ public interface IGestionEmprunt {
 	public List<Emprunt> filtrerParType(String type) throws InvalidParameterException, DatabaseException;
 	public List<Emprunt> filtrerParCommentaire(String commentaire) throws InvalidParameterException, DatabaseException;
 
+	// Méthodes spéciales pour la gestion des fonds de caisse par les réparateurs
+	public void ajouterFondsCaisse(int idCaisse, int idReparateur, double montant, String commentaire)
+			throws DuplicateEntityException, DatabaseException, InvalidParameterException;
+	public void retirerFondsCaisse(int idCaisse, int idReparateur, double montant, String commentaire)
+			throws DuplicateEntityException, DatabaseException, InvalidParameterException;
+	public List<Emprunt> listerEmpruntsParCaisse(int idCaisse) throws DatabaseException;
+	public List<Emprunt> listerEmpruntsParReparateur(int idReparateur) throws DatabaseException;
+
 }
+
+
 
 
 

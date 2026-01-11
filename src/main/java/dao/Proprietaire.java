@@ -18,3 +18,5 @@ public class Proprietaire extends Personne {
 	private String email;
 	private String mdp;
 }
+
+

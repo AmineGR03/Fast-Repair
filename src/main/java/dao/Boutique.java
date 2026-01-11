@@ -35,3 +35,5 @@ public class Boutique {
 	private Caisse caisse;
 
 }
+
+

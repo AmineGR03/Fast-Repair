@@ -113,7 +113,42 @@ public class MainWindow extends JFrame {
     }
 
     private void setupNavigation() {
-        // Les actions de navigation sont définies dans les listeners
+        // Ajouter les listeners aux boutons de navigation
+        setupNavigationListeners();
+    }
+
+    private void setupNavigationListeners() {
+        // Bouton Accueil - retourne à l'authentification
+        getNavigationButton("🏠 Accueil").addActionListener(e -> {
+            showPanel("AUTH");
+        });
+
+        // Bouton Suivre Réparation - panel de suivi
+        getNavigationButton("🔍 Suivre Réparation").addActionListener(e -> {
+            showPanel("SUIVI");
+        });
+
+        // Bouton Connexion - panel d'authentification
+        getNavigationButton("🔐 Connexion").addActionListener(e -> {
+            logout();
+        });
+
+        // Bouton Déconnexion - déconnexion et retour à l'authentification
+        getNavigationButton("🚪 Déconnexion").addActionListener(e -> {
+            logout();
+        });
+    }
+
+    private JButton getNavigationButton(String text) {
+        for (Component comp : navigationPanel.getComponents()) {
+            if (comp instanceof JButton) {
+                JButton btn = (JButton) comp;
+                if (text.equals(btn.getText())) {
+                    return btn;
+                }
+            }
+        }
+        return null;
     }
 
     public void showPanel(String panelName) {
@@ -143,7 +178,24 @@ public class MainWindow extends JFrame {
     }
 
     private void updateNavigationVisibility() {
-        // Cette méthode sera appelée depuis les panels enfants
+        // Masquer/afficher les boutons selon l'état de connexion
+        boolean isLoggedIn = currentUserRole != null;
+
+        // Le bouton "Connexion" n'est visible que si non connecté
+        getNavigationButton("🔐 Connexion").setVisible(!isLoggedIn);
+
+        // Le bouton "Déconnexion" n'est visible que si connecté
+        getNavigationButton("🚪 Déconnexion").setVisible(isLoggedIn);
+
+        // Le bouton "Accueil" est toujours visible
+        getNavigationButton("🏠 Accueil").setVisible(true);
+
+        // Le bouton "Suivre Réparation" est toujours visible
+        getNavigationButton("🔍 Suivre Réparation").setVisible(true);
+
+        // Actualiser l'apparence
+        navigationPanel.revalidate();
+        navigationPanel.repaint();
     }
 
     // Getters pour les panels
@@ -165,9 +217,11 @@ public class MainWindow extends JFrame {
                 break;
             case "REPARATEUR":
                 showPanel("REPARATEUR");
+                reparateurPanel.onUserLoggedIn();
                 break;
             case "PROPRIETAIRE":
                 showPanel("PROPRIETAIRE");
+                proprietairePanel.onUserLoggedIn();
                 break;
             default:
                 showPanel("AUTH");
@@ -204,3 +258,5 @@ public class MainWindow extends JFrame {
         });
     }
 }
+
+
