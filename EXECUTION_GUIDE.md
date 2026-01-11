@@ -72,12 +72,8 @@ Ouvrez **MySQL Workbench** ou votre client MySQL préféré et exécutez :
 -- Créer la base de données
 CREATE DATABASE fast_repair CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- Créer l'utilisateur
-CREATE USER 'fastrepair'@'localhost' IDENTIFIED BY 'password123';
 
--- Donner les permissions
-GRANT ALL PRIVILEGES ON fast_repair.* TO 'fastrepair'@'localhost';
-FLUSH PRIVILEGES;
+
 ```
 
 #### Modifier la configuration dans Eclipse :
@@ -117,8 +113,7 @@ Cliquez sur **Run**
 | Rôle | Email | Mot de Passe |
 |------|-------|-------------|
 | **Admin** | admin@fastrepair.com | admin123 |
-| **Propriétaire** | proprio@fastrepair.com | proprio123 |
-| **Réparateur** | reparateur@fastrepair.com | reparateur123 |
+
 
 ### Fonctionnalités Principales :
 
@@ -191,8 +186,7 @@ java -cp "target/classes;src/main/resources" presentation.MainWindow
 | Rôle | Email | Mot de Passe |
 |------|-------|-------------|
 | **Admin** | admin@fastrepair.com | admin123 |
-| **Propriétaire** | proprio@fastrepair.com | proprio123 |
-| **Réparateur** | reparateur@fastrepair.com | reparateur123 |
+
 
 ### Fonctionnalités Principales :
 
